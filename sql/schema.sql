@@ -61,3 +61,32 @@ CREATE TABLE(
     FOREIGN KEY (product_id)
     REFERENCES products(product_id)
 );
+
+
+-- Create the payments table
+CREATE TABLE payments(
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    payment_date DATE,
+    payment_method VARCHAR (20),
+    payment_status VARCHAR(20),
+    amount_paid DECIMAL(10,2),
+
+    FOREIGN KEY (order_id)
+    REFERENCES orders(order_id)
+);
+
+-- Create returns table
+CREATE TABLE returns (
+    return_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    order_item_id INT NOT NULL,
+    return_date DATE,
+    return_reason VARCHAR(255),
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id),
+
+    FOREIGN KEY (order_item_id)
+        REFERENCES order_items(order_item_id)
+);
