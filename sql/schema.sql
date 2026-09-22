@@ -50,10 +50,14 @@ CREATE TABLE order_items(
 );
 
 -- Create table products
-create table products(
-			customer_id varchar(50) primary key,
-            customer_unique_id varchar(50),
-            customer_zip_code_prefix int,
-            customer_city varchar(100),
-            customer_state varchar(2)
-            );
+CREATE TABLE products(
+    product_id varchar(50) primary key,
+    product_category_name varchar(50),
+    product_name_lenght int,
+    product_description_lenght int,
+    product_photos_qty int,
+    product_weight_g int,
+    product_length_cm  int,
+    product_height_cm int,
+    product_width_cm int
+)

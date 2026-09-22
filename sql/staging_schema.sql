@@ -21,3 +21,16 @@ CREATE TABLE staging_order_items(
     price varchar(10),
     freight_value varchar(10)
 );
+
+-- Creating staging table for products:
+CREATE TABLE staging_products (
+    product_id VARCHAR(50),
+    product_category_name VARCHAR(50),
+    product_name_lenght VARCHAR(3),
+    product_description_lenght VARCHAR(3),
+    product_photos_qty VARCHAR(3),
+    product_weight_g VARCHAR(3),
+    product_length_cm VARCHAR(3),
+    product_height_cm VARCHAR(3),
+    product_width_cm VARCHAR(3)
+);
