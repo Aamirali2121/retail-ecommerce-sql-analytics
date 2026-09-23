@@ -114,3 +114,29 @@ FROM staging_order_items;
 -- Validation
 SELECT COUNT(*) FROM order_items;
 
+-- =====================================================
+-- ETL: Payments
+-- Source      : staging_payments
+-- Destination: payments
+-- Purpose: Convert VARCHAR to DECIMAL
+-- =====================================================
+
+-- QA
+INSERT INTO payments(
+    order_id,
+    payment_sequential,
+    payment_type,
+    payment_installments,
+    payment_value
+)
+SELECT 
+    order_id,
+    cast(payment_sequential as signed),
+    payment_type,
+    cast(payment_installments as signed),
+    cast(payment_value as decimal(10, 2))
+    FROM staging_payments;
+
+-- Validation 
+SELECT COUNT(*) as production_rows
+FROM payments;

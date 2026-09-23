@@ -128,3 +128,93 @@ CREATE TABLE order_items(
     references products(product_id)
 );
 select count(*) from order_items;
+
+CREATE TABLE products (
+    product_id VARCHAR(50) PRIMARY KEY,
+    product_category_name VARCHAR(50),
+    product_name_lenght INT,
+    product_description_lenght INT,
+    product_photos_qty INT,
+    product_weight_g INT,
+    product_length_cm INT,
+    product_height_cm INT,
+    product_width_cm INT
+);
+
+CREATE TABLE staging_products (
+    product_id VARCHAR(50),
+    product_category_name VARCHAR(50),
+    product_name_lenght VARCHAR(3),
+    product_description_lenght VARCHAR(3),
+    product_photos_qty VARCHAR(3),
+    product_weight_g VARCHAR(3),
+    product_length_cm VARCHAR(3),
+    product_height_cm VARCHAR(3),
+    product_width_cm VARCHAR(3)
+);
+
+insert into products(
+    product_id,
+    product_category_name,
+    product_name_lenght,
+    product_description_lenght,
+    product_photos_qty,
+    product_weight_g,
+    product_length_cm,
+    product_height_cm,
+    product_width_cm
+)
+select 
+    product_id,
+    nullif(product_category_name,''),
+    cast(nullif(product_name_lenght, '') as signed),
+    cast(nullif(product_description_lenght, '') as signed),
+    cast(nullif(product_photos_qty,'') as signed),
+    cast(nullif(product_weight_g,'') as signed),
+    cast(nullif(product_length_cm,'') as signed),
+    cast(nullif(product_height_cm,'') as signed),
+    cast(nullif(product_width_cm,'') as signed)
+FROM staging_products;
+
+select * from products;
+
+CREATE TABLE order_items(
+    order_id varchar(50) NOT NULL,
+    order_item_id int not null,
+    product_id varchar(50) not null,
+    seller_id varchar(50) not null,
+    shipping_limit_date datetime not null,
+    price decimal(10,2) not null,
+    freight_value decimal(10,2) not null,
+
+    PRIMARY KEY (order_id, order_item_id),
+
+    foreign key(order_id)
+    references orders(order_id),
+
+    foreign key(product_id)
+    references products(product_id)
+);
+
+select count(*) from order_items;
+
+insert into order_items(
+	order_id,
+	order_item_id,
+	product_id,
+	seller_id,
+	shipping_limit_date,
+	price,
+	freight_value
+)
+select 
+	order_id,
+	cast(order_item_id as signed),
+	product_id,
+	seller_id,
+	str_to_date(shipping_limit_date, '%Y-%m-%d %H:%i:%s'),
+	cast(price as decimal(10,2)),
+	cast(freight_value as decimal(10,2))
+    FROM staging_order_items;
+    
+select count(*) from order_items;

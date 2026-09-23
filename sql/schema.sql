@@ -61,3 +61,17 @@ CREATE TABLE products(
     product_height_cm int,
     product_width_cm int
 )
+
+-- Create table payments
+CREATE TABLE payments (
+    order_id VARCHAR(50) NOT NULL,
+    payment_sequential INT NOT NULL,
+    payment_type VARCHAR(20) NOT NULL,
+    payment_installments INT NOT NULL,
+    payment_value DECIMAL(10,2) NOT NULL,
+
+    PRIMARY KEY (order_id, payment_sequential),
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+);

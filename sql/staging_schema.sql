@@ -34,3 +34,13 @@ CREATE TABLE staging_products (
     product_height_cm VARCHAR(3),
     product_width_cm VARCHAR(3)
 );
+
+-- Create staging table for payments
+
+CREATE TABLE staging_payments (
+    order_id VARCHAR(50),
+    payment_sequential varchar(10),
+    payment_type VARCHAR(20),
+    payment_installments varchar(3),
+    payment_value varchar(10)
+);
