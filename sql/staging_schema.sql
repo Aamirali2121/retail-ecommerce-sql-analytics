@@ -44,3 +44,22 @@ CREATE TABLE staging_payments (
     payment_installments varchar(3),
     payment_value varchar(10)
 );
+
+-- Creating staging table for reviews:
+CREATE TABLE staging_reviews(
+    review_id varchar(50),
+    order_id varchar(50),
+    review_score varchar(2),
+    review_comment_title varchar(100),
+    review_comment_message VARCHAR(2000),
+    review_creation_date VARCHAR(50),
+    review_answer_timestamp VARCHAR(50)
+);
+
+-- Creating staging table for sellers:
+CREATE TABLE staging_sellers (
+    seller_id VARCHAR(50) NOT NULL,
+    seller_zip_code_prefix varchar(10) NOT NULL,
+    seller_city VARCHAR(50) NOT NULL,
+    seller_state VARCHAR(2) NOT NULL,
+);

@@ -60,7 +60,7 @@ CREATE TABLE products(
     product_length_cm  int,
     product_height_cm int,
     product_width_cm int
-)
+);
 
 -- Create table payments
 CREATE TABLE payments (
@@ -74,4 +74,30 @@ CREATE TABLE payments (
 
     FOREIGN KEY (order_id)
         REFERENCES orders(order_id)
+);
+
+-- Creating table reviews:
+CREATE TABLE reviews(
+    review_id varchar(50) NOT NULL,
+    order_id varchar(50) NOT NULL,
+    review_score int NOT NULL,
+    review_comment_title varchar(100),
+    review_comment_message TEXT,
+    review_creation_date datetime NOT NULL,
+    review_answer_timestamp datetime NOT NULL,
+
+    PRIMARY KEY(review_id, order_id),
+
+    FOREIGN KEY(order_id)
+    REFERENCES orders(order_id)
+);
+
+-- Create table sellers
+CREATE TABLE sellers (
+    seller_id VARCHAR(50) NOT NULL,
+    seller_zip_code_prefix INT NOT NULL,
+    seller_city VARCHAR(50) NOT NULL,
+    seller_state VARCHAR(2) NOT NULL,
+
+    PRIMARY KEY (seller_id)
 );

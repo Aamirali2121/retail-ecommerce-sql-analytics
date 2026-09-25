@@ -1,24 +1,17 @@
--- ==========================
--- DATA QUALITY AUDIT
--- ==========================
--- QA Check 1
-SELECT COUNT(*) FROM staging_orders;
-
--- QA Check 2
-SELECT COUNT(*) FROM orders;
-
--- QA Check 3
-SELECT COUNT(*) FROM customers;
 USE retail_ecommerce;
 
 -- =====================================================
 -- ETL: Orders
 -- Source      : staging_orders
 -- Destination : orders
--- Purpose     : Convert VARCHAR timestamps to DATETIME
 -- =====================================================
 
-insert into orders(
+-- Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_orders;
+SELECT COUNT(*) AS production_rows FROM orders;
+
+-- Transform & Load
+INSERT INTO orders (
     order_id,
     customer_id,
     order_status,
@@ -26,36 +19,35 @@ insert into orders(
     order_approved_at,
     order_delivered_carrier_date,
     order_delivered_customer_date,
-    order_estimated_delivery_date)
-select
-	order_id,
+    order_estimated_delivery_date
+)
+SELECT
+    order_id,
     customer_id,
     order_status,
-    str_to_date(nullif(order_purchase_timestamp,''),
-    '%Y-%m-%d %H:%i:%s'),
-    str_to_date(nullif(order_approved_at,''),
-    '%Y-%m-%d %H:%i:%s'),
-	str_to_date(nullif(order_delivered_carrier_date,''),
-    '%Y-%m-%d %H:%i:%s'),
-    str_to_date(nullif(order_delivered_customer_date,''),
-    '%Y-%m-%d %H:%i:%s'),
-    str_to_date(nullif(order_estimated_delivery_date,''),
-    '%Y-%m-%d %H:%i:%s')
-From staging_orders;
+    STR_TO_DATE(NULLIF(order_purchase_timestamp,''), '%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(NULLIF(order_approved_at,''), '%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(NULLIF(order_delivered_carrier_date,''), '%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(NULLIF(order_delivered_customer_date,''), '%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(NULLIF(order_estimated_delivery_date,''), '%Y-%m-%d %H:%i:%s')
+FROM staging_orders;
 
--- Validation: Check the number of rows after the ETL porcess
-select count(*) as production_rows 
-from orders;
+-- Validation
+SELECT COUNT(*) AS production_rows FROM orders;
 
 
 -- =====================================================
 -- ETL: Products
 -- Source      : staging_products
 -- Destination : products
--- Purpose     : Convert VARCHAR columns into analytical types
 -- =====================================================
 
-insert into products(
+-- Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_products;
+SELECT COUNT(*) AS production_rows FROM products;
+
+-- Transform & Load
+INSERT INTO products (
     product_id,
     product_category_name,
     product_name_lenght,
@@ -66,31 +58,34 @@ insert into products(
     product_height_cm,
     product_width_cm
 )
-select 
+SELECT
     product_id,
-    nullif(product_category_name,''),
-    cast(nullif(product_name_lenght, '') as signed),
-    cast(nullif(product_description_lenght, '') as signed),
-    cast(nullif(product_photos_qty,'') as signed),
-    cast(nullif(product_weight_g,'') as signed),
-    cast(nullif(product_length_cm,'') as signed),
-    cast(nullif(product_height_cm,'') as signed),
-    cast(nullif(product_width_cm,'') as signed)
+    NULLIF(product_category_name,''),
+    CAST(NULLIF(product_name_lenght,'') AS SIGNED),
+    CAST(NULLIF(product_description_lenght,'') AS SIGNED),
+    CAST(NULLIF(product_photos_qty,'') AS SIGNED),
+    CAST(NULLIF(product_weight_g,'') AS SIGNED),
+    CAST(NULLIF(product_length_cm,'') AS SIGNED),
+    CAST(NULLIF(product_height_cm,'') AS SIGNED),
+    CAST(NULLIF(product_width_cm,'') AS SIGNED)
 FROM staging_products;
+
+-- Validation
+SELECT COUNT(*) AS production_rows FROM products;
 
 
 -- =====================================================
 -- ETL: Order Items
 -- Source      : staging_order_items
 -- Destination : order_items
--- Purpose    : Convert VARCHAR to DECIMAL
 -- =====================================================
 
--- QA
-SELECT COUNT(*) FROM staging_order_items;
-SELECT COUNT(*) FROM order_items;
+-- Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_order_items;
+SELECT COUNT(*) AS production_rows FROM order_items;
 
-INSERT INTO order_items(
+-- Transform & Load
+INSERT INTO order_items (
     order_id,
     order_item_id,
     product_id,
@@ -99,44 +94,106 @@ INSERT INTO order_items(
     price,
     freight_value
 )
-SELECT 
+SELECT
     order_id,
-    cast(order_item_id as signed),
+    CAST(order_item_id AS SIGNED),
     product_id,
     seller_id,
-    str_to_date(shipping_limit_date,'%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(shipping_limit_date, '%Y-%m-%d %H:%i:%s'),
     CAST(price AS DECIMAL(10,2)),
     CAST(freight_value AS DECIMAL(10,2))
 FROM staging_order_items;
 
-
-
 -- Validation
-SELECT COUNT(*) FROM order_items;
+SELECT COUNT(*) AS production_rows FROM order_items;
+
 
 -- =====================================================
 -- ETL: Payments
 -- Source      : staging_payments
--- Destination: payments
--- Purpose: Convert VARCHAR to DECIMAL
+-- Destination : payments
 -- =====================================================
 
--- QA
-INSERT INTO payments(
+-- Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_payments;
+SELECT COUNT(*) AS production_rows FROM payments;
+
+-- Transform & Load
+INSERT INTO payments (
     order_id,
     payment_sequential,
     payment_type,
     payment_installments,
     payment_value
 )
-SELECT 
+SELECT
     order_id,
-    cast(payment_sequential as signed),
+    CAST(payment_sequential AS SIGNED),
     payment_type,
-    cast(payment_installments as signed),
-    cast(payment_value as decimal(10, 2))
-    FROM staging_payments;
+    CAST(payment_installments AS SIGNED),
+    CAST(payment_value AS DECIMAL(10,2))
+FROM staging_payments;
 
--- Validation 
-SELECT COUNT(*) as production_rows
-FROM payments;
+-- Validation
+    SELECT COUNT(*) AS production_rows FROM payments;
+
+
+-- =====================================================
+-- ETL: Reviews
+-- Source      : staging_reviews
+-- Destination : reviews
+-- =====================================================
+
+--  Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_reviews;
+SELECT COUNT(*) AS production_rows FROM reviews;
+
+-- Transform & Load
+INSERT INTO reviews (
+    review_id,
+    order_id,
+    review_score,
+    review_comment_title,
+    review_comment_message,
+    review_creation_date,
+    review_answer_timestamp
+)
+SELECT
+    review_id,
+    order_id,
+    CAST(review_score AS SIGNED),
+    NULLIF(review_comment_title,''),
+    NULLIF(review_comment_message,''),
+    STR_TO_DATE(review_creation_date, '%Y-%m-%d %H:%i:%s'),
+    STR_TO_DATE(review_answer_timestamp, '%Y-%m-%d %H:%i:%s')
+FROM staging_reviews;
+
+-- Validation
+SELECT COUNT(*) AS production_rows FROM reviews;
+
+-- ======================================================
+-- ETL: Sellers
+-- Source: staging_sellers
+-- Destination: sellers
+-- ======================================================
+
+-- Pre-Load QA
+SELECT COUNT(*) AS staging_rows FROM staging_sellers;
+SELECT COUNT(*) AS production_rows FROM sellers;
+
+-- Transform & Load
+insert into sellers(
+    seller_id,
+    seller_zip_code_prefix,
+    seller_city,
+    seller_state
+)
+select
+    seller_id,
+    cast(seller_zip_code_prefix as signed),
+    seller_city,
+    seller_state
+from staging_sellers;
+
+-- Validation
+SELECT COUNT(*) AS production_rows from sellers;

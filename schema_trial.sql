@@ -17,7 +17,7 @@ LOAD DATA LOCAL INFILE 'C:/Users/aamir/OneDrive/Desktop/Projects/retail-ecommerc
 INTO TABLE orders
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
+LINES TERMINATED BY 'n'
 IGNORE 1 ROWS
 (
   order_id,
@@ -107,7 +107,7 @@ LOAD DATA LOCAL INFILE 'C:/Users/aamir/OneDrive/Desktop/Projects/retail-ecommerc
 INTO TABLE staging_orders
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
+LINES TERMINATED BY 'n'
 IGNORE 1 ROWS;
 
 CREATE TABLE order_items(
@@ -218,3 +218,46 @@ select
     FROM staging_order_items;
     
 select count(*) from order_items;
+
+use retail_ecommerce;
+
+CREATE TABLE staging_payments (
+    order_id VARCHAR(50),
+    payment_sequential varchar(10),
+    payment_type VARCHAR(20),
+    payment_installments varchar(3),
+    payment_value varchar(10)
+);
+
+CREATE TABLE payments (
+    order_id VARCHAR(50) NOT NULL,
+    payment_sequential INT NOT NULL,
+    payment_type VARCHAR(20) NOT NULL,
+    payment_installments INT NOT NULL,
+    payment_value DECIMAL(10,2) NOT NULL,
+
+    PRIMARY KEY (order_id, payment_sequential),
+
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+);
+
+INSERT INTO payments(
+    order_id,
+    payment_sequential,
+    payment_type,
+    payment_installments,
+    payment_value
+)
+SELECT 
+    order_id,
+    cast(payment_sequential as signed),
+    payment_type,
+    cast(payment_installments as signed),
+    cast(payment_value as decimal(10, 2))
+    FROM staging_payments;
+    
+    SELECT COUNT(*) as production_rows
+FROM payments;
+Copied from Explorer:
+C:/Users/aamir/OneDrive/Desktop/Projects/data/olist_products_dataset.csv
